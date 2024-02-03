@@ -30,3 +30,16 @@
 *.exe
 *.out
 *.app
+
+build/
+bin
+
+# temporary
+*.temp
+*.tmp
+*.swp
+
+
+# server states
+*.tmp.*
+*.temp.*
