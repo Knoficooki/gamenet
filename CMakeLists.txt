@@ -29,12 +29,14 @@ set(CMAKE_C_STANDARD 17)
 set(SHARED_SOURCES ${SHARED_CPP_SOURCES} ${SHARED_C_SOURCES})
 set(SHARED_HEADERS ${SHARED_CPP_HEADER} ${SHARED_C_HEADER})
 
-message(STATUS ${SHARED_SOURCES})
-
 add_library(sharedlibobj OBJECT ${SHARED_SOURCES} ${SHARED_HEADERS})
 
 # shared libraries need PIC
 set_property(TARGET sharedlibobj PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+if(WIN32)
+  target_link_libraries(sharedlibobj wsock32 ws2_32)
+endif()
 
 if(${BUILD_SERVER})
 	add_subdirectory("${SOURCE_FOLDER}/server/")

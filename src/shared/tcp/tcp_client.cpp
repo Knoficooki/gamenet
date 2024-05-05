@@ -1,41 +1,104 @@
 #include "tcp_client.hpp"
-#include <string>
-#include <cstdint>
-#include <exception>
-
+#include <common/permissions.hpp>
+#include <iostream>
+#include <boost/exception/all.hpp> 
 
 using boost::asio::ip::tcp;
 
-
 namespace net {
-	int net::TCPClient::connect(const std::string& ip, const std::string& port)
+	TCPClient::TCPClient(const std::string& ip, const std::string& port)
+		: resolver(io_context), socket(io_context)
 	{
-		tcp::resolver resolver(io_context);
 		auto endpoints = resolver.resolve(ip, port);
-		tcp::socket socket(io_context);
 		boost::asio::connect(socket, endpoints);
 
-		net::permissions sp = *((net::permissions*)recieve(sizeof(net::permissions)));
+		net::permissions sp = *receive<net::permissions>();
 
 		PermissionFlag::set(flag, sp);
-		PermissionFlag::rem(flag, net::permissions::read);
-		PermissionFlag::rem(flag, net::permissions::write);
-		
-		
-		
+	}
+
+	template<typename T>
+	int TCPClient::send(T* data)
+	{
+		try {
+			socket.write_some(boost::asio::buffer(data, sizeof(T)));
+		}
+		catch (const boost::exception& e) {
+			// Handle Boost-specific exceptions
+			std::cerr << "Boost exception: " << boost::diagnostic_information(e);
+		}
+		catch (const std::exception& e) {
+			// Handle standard exceptions
+			throw std::exception();
+		}
+		catch (...) {
+			// Handle all other types of exceptions
+			throw std::exception("Unknown error occurred while trying to send data via TCP.");
+		}
 		return 0;
 	}
 
-	int TCPClient::send(void* data, uint64_t size)
+	int TCPClient::send(void* data, uint64_t count)
 	{
-		throw std::exception("Unimplemented!");
+		try {
+			socket.write_some(boost::asio::buffer(data, sizeof(char) * count));
+		}
+		catch (const boost::exception& e) {
+			// Handle Boost-specific exceptions
+			std::cerr << "Boost exception: " << boost::diagnostic_information(e);
+		}
+		catch (const std::exception& e) {
+			// Handle standard exceptions
+			throw std::exception();
+		}
+		catch (...) {
+			// Handle all other types of exceptions
+			throw std::exception("Unknown error occurred while trying to send data via TCP.");
+		}
 		return 0;
 	}
 
-	void* TCPClient::recieve(uint64_t size)
+	template<typename T>
+	T* TCPClient::receive()
 	{
-		char* data = new char[size];
-		socket.read_some(boost::asio::buffer(data, size));
-		return nullptr;
+		try {
+			T* data = new T;
+			socket.read_some(boost::asio::buffer(data, sizeof(T)));
+			return data;
+		}
+		catch (const boost::exception& e) {
+			// Handle Boost-specific exceptions
+			std::cerr << "Boost exception: " << boost::diagnostic_information(e);
+		}
+		catch (const std::exception& e) {
+			// Handle standard exceptions
+			throw std::exception();
+		}
+		catch (...) {
+			// Handle all other types of exceptions
+			throw std::exception("Unknown error occurred while trying to receive data via TCP.");
+		}
+	}
+
+	template<typename T>
+	T* TCPClient::receive(uint64_t count)
+	{
+		try {
+			T* data = new T[count];
+			socket.read_some(boost::asio::buffer(data, sizeof(T) * count));
+			return data;
+		}
+		catch (const boost::exception& e) {
+			// Handle Boost-specific exceptions
+			std::cerr << "Boost exception: " << boost::diagnostic_information(e);
+		}
+		catch (const std::exception& e) {
+			// Handle standard exceptions
+			throw std::exception();
+		}
+		catch (...) {
+			// Handle all other types of exceptions
+			throw std::exception("Unknown error occurred while trying to receive data via TCP.");
+		}
 	}
 }

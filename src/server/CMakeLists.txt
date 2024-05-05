@@ -27,6 +27,11 @@ add_executable(server_app
 	${SCHEADERS}
 )
 
+if(WIN32)
+  target_link_libraries(server_app wsock32 ws2_32)
+endif()
+
+
 target_compile_definitions(server_app PRIVATE
                                 $<$<CONFIG:Debug>:_DEBUG>
                             )

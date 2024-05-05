@@ -1,8 +1,10 @@
+// FlagManager.hpp
+
 #pragma once
 
 namespace flags {
 
-    template<typename flagtype>
+    template<typename flagtype, typename cast_type = unsigned int>
     class FlagManager {
     public:
         static void add(flagtype& flags, const flagtype& add_flags);
@@ -15,4 +17,4 @@ namespace flags {
         static bool get(const flagtype& flags, const unsigned char check_flag);
     };
 
-} // namespace flags
+}

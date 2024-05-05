@@ -27,6 +27,10 @@ add_executable(client_app
 	${CCHEADERS}
 )
 
+if(WIN32)
+  target_link_libraries(client_app wsock32 ws2_32)
+endif()
+
 target_compile_definitions(client_app PRIVATE
                                 $<$<CONFIG:Debug>:_DEBUG>
                             )
