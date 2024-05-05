@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(server)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_C_STANDARD 17)
-
 include_directories(${PROJECT_SOURCE_DIR}/include/)
 
 set(SERVER_EXEC_NAME "sgn" CACHE STRING "The name of the executable.")
@@ -25,7 +22,7 @@ set(SCSOURCES ${SC_SOURCES} ${SCPP_SOURCES} ${SCXX_SOURCES})
 
 
 add_executable(server_app
-	${SHARED_ITEMS}
+	$<TARGET_OBJECTS:sharedlibobj>
 	${SCSOURCES} 
 	${SCHEADERS}
 )

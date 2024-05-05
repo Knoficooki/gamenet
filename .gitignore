@@ -43,3 +43,6 @@ bin
 # server states
 *.tmp.*
 *.temp.*
+
+build/
+bin/

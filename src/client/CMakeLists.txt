@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(client)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_C_STANDARD 17)
-
 include_directories(${PROJECT_SOURCE_DIR}/include/)
 
 set(CLIENT_EXEC_NAME "gnc" CACHE STRING "The name of the executable.")
@@ -25,7 +22,7 @@ set(CCSOURCES ${CC_SOURCES} ${CCPP_SOURCES} ${CCXX_SOURCES})
 
 
 add_executable(client_app
-	${SHARED_SOURCES}
+	$<TARGET_OBJECTS:sharedlibobj>
 	${CCSOURCES} 
 	${CCHEADERS}
 )
