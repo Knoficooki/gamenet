@@ -2,6 +2,11 @@
 #include <exception>
 #include <stdint.h>
 
+#ifndef NET_EXCEPTION_INCLUDE
+#define NET_EXCEPTION_INCLUDE
+#define netexcept(msg, level) net::exception(msg, level, __LINE__, __FILE__, __func__)
+#endif
+
 namespace net {
 	class exception : private std::exception {
 	public:
@@ -41,9 +46,11 @@ void net::exception::handle(void)
 	if (except_level > net::exception::log_level) {
 		log();
 	}
+#ifdef _DEBUG
 	if (except_level > net::exception::out_level) {
 		std::cerr << what() << std::endl;
 	}
+#endif
 }
 
 const char* net::exception::what()

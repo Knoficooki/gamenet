@@ -31,8 +31,9 @@
 *.out
 *.app
 
+# build
 build/
-bin
+bin/
 
 # temporary
 *.temp
@@ -44,6 +45,4 @@ bin
 *.tmp.*
 *.temp.*
 
-build/
-bin/
 .vs/

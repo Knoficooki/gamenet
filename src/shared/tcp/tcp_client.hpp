@@ -7,6 +7,7 @@
 #include <common/utils/flag.hpp>
 #include <stdint.h>
 #include <string>
+#include <common/exception/exception.hpp>
 
 namespace net {
 	class TCPClient : NetObject {
@@ -17,16 +18,13 @@ namespace net {
 		boost::asio::ip::tcp::socket socket;
 		net::permissions flag; // sx, sw, sr, w, r
 	public:
+		exception::level error_level = exception::level::fatal;
+		
 		TCPClient(const std::string& ip, const std::string& port);
-
-		template<typename T>
-		int send(T* data);
-		int send(void* data, uint64_t size);
-
-		template<typename T>
-		T* receive();
-		template<typename T>
-		T* receive(uint64_t count);
+		
+		int send(const void* data, uint64_t size);
+		
+		int receive(void* data, uint64_t size);
 	};
 }
 
@@ -45,96 +43,61 @@ namespace net {
 		auto endpoints = resolver.resolve(ip, port);
 		boost::asio::connect(socket, endpoints);
 
-		net::permissions sp = *receive<net::permissions>();
+		net::permissions sp;
+		if (receive(&sp, sizeof(sp))) {
+			throw netexcept("Could not receive permission flags.", net::exception::level::fatal);
+		}
 
 		PermissionFlag::set(flag, sp);
 	}
 
-	template<typename T>
-	int TCPClient::send(T* data)
+	int TCPClient::send(const void* data, uint64_t size)
 	{
 		try {
-			socket.write_some(boost::asio::buffer(data, sizeof(T)));
+			socket.write_some(boost::asio::buffer(data, sizeof(char) * size));
+			return 0;
 		}
 		catch (const boost::exception& e) {
 			// Handle Boost-specific exceptions
-			std::cerr << "Boost exception: " << boost::diagnostic_information(e);
+			throw netexcept(boost::diagnostic_information(e).c_str(), error_level);
 		}
 		catch (const std::exception& e) {
 			// Handle standard exceptions
-			throw std::exception(e);
+			throw netexcept(e.what(), error_level);
 		}
 		catch (...) {
 			// Handle all other types of exceptions
-			throw;
+			throw netexcept("An unexpected error occurred.", error_level);
 		}
-		return 0;
+		return -1;
 	}
 
-	int TCPClient::send(void* data, uint64_t count)
+	
+	int TCPClient::receive(void* data,uint64_t size)
 	{
 		try {
-			socket.write_some(boost::asio::buffer(data, sizeof(char) * count));
+			if (!data) {
+				data = new char[size];
+			}
+			socket.read_some(boost::asio::buffer(data, sizeof(char) * size));
+			return 0;
 		}
 		catch (const boost::exception& e) {
 			// Handle Boost-specific exceptions
-			std::cerr << "Boost exception: " << boost::diagnostic_information(e);
+			throw netexcept(boost::diagnostic_information(e).c_str(), error_level);
 		}
 		catch (const std::exception& e) {
 			// Handle standard exceptions
-			throw std::exception(e);
+			throw netexcept(e.what(), error_level);
 		}
 		catch (...) {
 			// Handle all other types of exceptions
-			throw;
+			throw netexcept("An unexpected error occurred.", error_level);
 		}
-		return 0;
-	}
-
-	template<typename T>
-	T* TCPClient::receive()
-	{
-		try {
-			T* data = new T;
-			socket.read_some(boost::asio::buffer(data, sizeof(T)));
-			return data;
-		}
-		catch (const boost::exception& e) {
-			// Handle Boost-specific exceptions
-			std::cerr << "Boost exception: " << boost::diagnostic_information(e);
-		}
-		catch (const std::exception& e) {
-			// Handle standard exceptions
-			throw std::exception(e);
-		}
-		catch (...) {
-			// Handle all other types of exceptions
-			throw;
-		}
-	}
-
-	template<typename T>
-	T* TCPClient::receive(uint64_t count)
-	{
-		try {
-			T* data = new T[count];
-			socket.read_some(boost::asio::buffer(data, sizeof(T) * count));
-			return data;
-		}
-		catch (const boost::exception& e) {
-			// Handle Boost-specific exceptions
-			std::cerr << "Boost exception: " << boost::diagnostic_information(e);
-		}
-		catch (const std::exception& e) {
-			// Handle standard exceptions
-			throw std::exception(e);
-		}
-		catch (...) {
-			// Handle all other types of exceptions
-			throw;
-		}
+		return -1;
 	}
 }
+
 #undef TCP_CLIENT_IMPLEMENTATION
 #endif // TCP_CLIENT_IMPLEMENTATION
 

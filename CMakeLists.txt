@@ -3,9 +3,9 @@ project(gamenet)
 
 set(SOURCE_FOLDER "src" CACHE STRING "Path to source.")
 
-set(BUILD_SERVER TRUE CACHE BOOL "Build the server app.")
+set(BUILD_SERVER FALSE CACHE BOOL "Build the server app.")
 
-set(BUILD_CLIENT TRUE CACHE BOOL "Build a client app.")
+set(BUILD_CLIENT FALSE CACHE BOOL "Build a client app.")
 
 set(BOOST_LOCATION "C:\\Program Files\\boost\\boost_1_85_0\\" CACHE STRING "The Path to boost.")
 
@@ -21,22 +21,18 @@ file(GLOB_RECURSE SHARED_C_SOURCES ABSOLUTE ${PROJECT_SOURCE_DIR} "${SOURCE_FOLD
 
 file(GLOB_RECURSE SHARED_C_HEADER ABSOLUTE ${PROJECT_SOURCE_DIR} "${SOURCE_FOLDER}/shared/*.h")
 
-
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD 17)
 
 set(SHARED_SOURCES ${SHARED_CPP_SOURCES} ${SHARED_C_SOURCES})
 set(SHARED_HEADERS ${SHARED_CPP_HEADER} ${SHARED_C_HEADER})
 
-add_library(sharedlibobj OBJECT ${SHARED_SOURCES} ${SHARED_HEADERS})
+# Erstellen Sie ein Custom Target, das nichts baut
+add_custom_target(shared SOURCES ${SHARED_SOURCES} ${SHARED_HEADERS})
 
-# shared libraries need PIC
-set_property(TARGET sharedlibobj PROPERTY POSITION_INDEPENDENT_CODE 1)
-
-if(WIN32)
-  target_link_libraries(sharedlibobj wsock32 ws2_32)
-endif()
+# Organisieren Sie die Dateien in einer Quellgruppe
+source_group(TREE "${PROJECT_SOURCE_DIR}/${SOURCE_FOLDER}/shared/" PREFIX "Source Files" FILES ${SHARED_SOURCES})
+source_group(TREE "${PROJECT_SOURCE_DIR}/${SOURCE_FOLDER}/shared/" PREFIX "Header Files" FILES ${SHARED_HEADERS})
 
 if(${BUILD_SERVER})
 	add_subdirectory("${SOURCE_FOLDER}/server/")

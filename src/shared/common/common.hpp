@@ -1,7 +1,10 @@
-#ifndef COMMON_HPP
-#define COMMON_HPP
+#pragma once
 
 #include <boost/asio.hpp>
+
+#ifndef NET_EXCEPTION_INCLUDE
+#define netexcept(msg, level) 
+#endif
 
 // Common utilities for networking
 namespace net {
@@ -12,8 +15,6 @@ namespace net {
         NetObject() = default;
     };
 }
-
-#endif // COMMON_HPP
 
 #ifdef NET_COMMON_IMPLEMENTATION
 // common/common.cpp

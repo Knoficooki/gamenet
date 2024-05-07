@@ -1,6 +1,8 @@
 #include <boost/asio.hpp>
 #include <iostream>
 
+#include <common/permissions.hpp>
+
 using boost::asio::ip::tcp;
 
 
@@ -28,14 +30,16 @@ list get_message(tcp::socket& sender) {
     data.data = new char[h->length+1];
     data.data[h->length] = 0;
     sender.read_some(boost::asio::buffer(data.data, h->length));
-    delete h;
     data.len = h->length;
+    delete h;
     return data;
 }
 
 
 void handle_client(tcp::socket socket) {
     std::cout << "Client connected...\n";
+    net::permissions sp = net::permissions::full;
+    socket.write_some(boost::asio::buffer(&sp, sizeof(sp)));
     std::cout << get_message(socket).data << std::endl;
 }
 
