@@ -1,16 +1,17 @@
 // tcp/tcp_client.hpp
 #ifndef TCP_CLIENT_HPP
 #define TCP_CLIENT_HPP
+#include "../common/common.hpp"
+#include "../common/exception/exception.hpp"
+#include "../common/permissions.hpp"
+#include "../common/utils/flag.hpp"
+
 #include <boost/asio.hpp>
-#include <common/common.hpp>
-#include <common/permissions.hpp>
-#include <common/utils/flag.hpp>
 #include <stdint.h>
 #include <string>
-#include <common/exception/exception.hpp>
 
 namespace net {
-	class TCPClient : NetObject {
+	class TCPClient : public NetObject {
 	protected:
 		using PermissionFlag = flags::FlagManager<net::permissions>;
 	private:
@@ -19,11 +20,11 @@ namespace net {
 		net::permissions flag; // sx, sw, sr, w, r
 	public:
 		exception::level error_level = exception::level::fatal;
-		
+
 		TCPClient(const std::string& ip, const std::string& port);
-		
+
 		int send(const void* data, uint64_t size);
-		
+
 		int receive(void* data, uint64_t size);
 	};
 }
@@ -72,8 +73,8 @@ namespace net {
 		return -1;
 	}
 
-	
-	int TCPClient::receive(void* data,uint64_t size)
+
+	int TCPClient::receive(void* data, uint64_t size)
 	{
 		try {
 			if (!data) {
