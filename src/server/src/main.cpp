@@ -41,7 +41,7 @@ list get_message(tcp::socket& sender) {
 }
 
 
-void handle_client(tcp::socket socket) {
+void handle_client(net::TCPServer::client_state& state , tcp::socket& socket) {
 	std::cout << "Client connected...\n";
 	net::permissions sp = net::permissions::full;
 	socket.write_some(boost::asio::buffer(&sp, sizeof(sp)));
@@ -50,14 +50,7 @@ void handle_client(tcp::socket socket) {
 
 int main() {
 	try {
-		boost::asio::io_context io_context;
-		tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 1234));
-
-		while (true) {
-			tcp::socket socket(io_context);
-			acceptor.accept(socket);
-			std::thread(handle_client, std::move(socket)).detach();
-		}
+		net::TCPServer(tcp::v4(), 1234, handle_client);
 	}
 	catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;

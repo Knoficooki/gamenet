@@ -13,7 +13,7 @@
 namespace net {
 	class TCPClient : public NetObject {
 	protected:
-		using PermissionFlag = flags::FlagManager<net::permissions>;
+		using PermissionFlag = flags::FlagManager<net::permissions ,net::permissions>;
 	private:
 		boost::asio::ip::tcp::resolver resolver;
 		boost::asio::ip::tcp::socket socket;
